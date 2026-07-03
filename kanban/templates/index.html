@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XPDefect - Mi Tablero Trello</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col">
+            <h1 class="fw-bold text-dark">XPDefect <span class="fs-5 text-muted">| Kanban de Seguimiento</span></h1>
+        </div>
+    </div>
+
+    <div class="row g-3">
+        
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0 bg-white p-3 mb-3">
+                <h5 class="fw-bold text-dark mb-3">🛠️ Panel de Control</h5>
+                <p class="small text-muted mb-3"><strong>Proyecto Activo:</strong> Delivery App (Ficticio)</p>
+                <button class="btn btn-outline-primary btn-sm w-100 mb-2" data-bs-toggle="modal" data-bs-target="#modalNuevaHU">+ Crear Historia de Usuario (HU)</button>
+                <button class="btn btn-success btn-sm w-100 mb-2" data-bs-toggle="modal" data-bs-target="#modalNuevoBug">+ Reportar Nuevo Defecto</button>
+            </div>
+
+            <div class="card shadow-sm border-0 bg-white p-3 mb-3">
+                <h5 class="fw-bold text-dark mb-2">📖 Diccionario de HUs</h5>
+                <p class="text-muted small mb-3">Lista de funciones del sistema para asociar a los bugs.</p>
+                <div style="max-height: 150px; overflow-y: auto;" class="pe-1">
+                    <div class="p-2 border-bottom small">
+                        <strong class="text-primary">HU01:</strong> Buscador y Filtros de Productos
+                    </div>
+                    <div class="p-2 border-bottom small">
+                        <strong class="text-primary">HU02:</strong> Pasarela de Pagos y Carrito
+                    </div>
+                    <div class="p-2 border-bottom small">
+                        <strong class="text-primary">HU03:</strong> Registro e Inicio de Sesión
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow-sm border-0 bg-white p-3">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="fw-bold text-dark mb-0">👥 Equipos de Trabajo</h5>
+                    <button class="btn btn-sm btn-outline-secondary py-0 px-2" title="Registrar nuevo equipo">+</button>
+                </div>
+
+                <div class="p-2 border rounded bg-light">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="badge bg-primary">Equipo Alfa</span>
+                        <small class="text-muted">Líder: Rafael C.</small>
+                    </div>
+                    <div class="mt-2 small text-secondary">
+                        <div><strong>Integrantes:</strong> Luciana A., Pedro M.</div>
+                        <div><strong>Tickets Asignados:</strong> <span class="badge bg-secondary">2</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-9">
+            <div class="row row-cols-1 row-cols-lg-5 g-2 align-items-start">
+                
+                <div class="col">
+                    <div class="bg-secondary bg-opacity-10 p-2 rounded" style="min-height: 70vh;">
+                        <h6 class="fw-bold text-uppercase text-muted small px-1 mb-2">1. Abierto (2)</h6>
+                        
+                        <div class="card shadow-sm border-0 mb-2" style="cursor: pointer;" data-bs-toggle="modal" data-bs-target="#modalError01">
+                            <div class="card-body p-2">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <span class="badge bg-danger small">Alta</span>
+                                    <small class="text-muted fw-bold">#BUG-001</small>
+                                </div>
+                                <h6 class="card-title mb-2 text-dark fw-semibold small">El carrito se vacía solo al pagar</h6>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="small text-muted"><span class="badge bg-danger p-1 rounded-circle"> </span> Sin asignar</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card shadow-sm border-0 mb-2" style="cursor: pointer; opacity: 0.85;" data-bs-toggle="modal" data-bs-target="#modalError02">
+                            <div class="card-body p-2">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <span class="badge bg-warning text-dark small">Media</span>
+                                    <small class="text-muted fw-bold">#BUG-002</small>
+                                </div>
+                                <h6 class="card-title mb-2 text-dark fw-semibold small">Filtro de precios ordena alfabéticamente</h6>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="small text-muted"><span class="badge bg-success p-1 rounded-circle"> </span> Equipo Alfa</span>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="col">
+                    <div class="bg-secondary bg-opacity-10 p-2 rounded" style="min-height: 70vh;">
+                        <h6 class="fw-bold text-uppercase text-muted small px-1 mb-2">2. En Análisis (0)</h6>
+                    </div>
+                </div>
+
+                <div class="col">
+                    <div class="bg-secondary bg-opacity-10 p-2 rounded" style="min-height: 70vh;">
+                        <h6 class="fw-bold text-uppercase text-muted small px-1 mb-2">3. En Corrección (0)</h6>
+                    </div>
+                </div>
+
+                <div class="col">
+                    <div class="bg-secondary bg-opacity-10 p-2 rounded" style="min-height: 70vh;">
+                        <h6 class="fw-bold text-uppercase text-muted small px-1 mb-2">4. Resuelto (0)</h6>
+                    </div>
+                </div>
+
+                <div class="col">
+                    <div class="bg-secondary bg-opacity-10 p-2 rounded" style="min-height: 70vh;">
+                        <h6 class="fw-bold text-uppercase text-muted small px-1 mb-2">5. Cerrado (0)</h6>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<div class="modal fade" id="modalNuevaHU" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title fw-bold">➕ Registrar Historia de Usuario (HU)</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <form method="POST">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold text-secondary">Código identificador</label>
+                        <input type="text" class="form-placeholder form-control" placeholder="Ej: HU04" name="codigo_hu" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold text-secondary">Descripción de la Funcionalidad</label>
+                        <textarea class="form-control" rows="3" placeholder="Como usuario quiero... para..." name="descripcion_hu" required></textarea>
+                    </div>
+                    <div class="text-end mt-3">
+                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary btn-sm">Guardar HU</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalNuevoBug" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title fw-bold">🪲 Reportar Nuevo Defecto</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <form method="POST">
+                    {% csrf_token %}
+                    <div class="row mb-3">
+                        <div class="col-6">
+                            <label class="form-label fw-semibold text-secondary">Identificador</label>
+                            <input type="text" class="form-control" value="Automático" readonly>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label fw-semibold text-secondary">Severidad / Urgencia</label>
+                            <select class="form-select" name="severidad_bug">
+                                <option value="BAJA">Baja</option>
+                                <option value="MEDIA" selected>Media</option>
+                                <option value="ALTA">Alta</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold text-secondary">Título del Error</label>
+                        <input type="text" class="form-control" placeholder="Breve resumen del fallo" name="titulo_bug" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold text-secondary">Descripción Detallada</label>
+                        <textarea class="form-control" rows="3" placeholder="Pasos para reproducir el error..." name="descripcion_bug" required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold text-secondary">Asociar a Historia de Usuario (HU)</label>
+                        <select class="form-select" name="hu_asociada" required>
+                            <option value="" disabled selected>-- Selecciona qué funcionalidad falló --</option>
+                            {% for hu in hus %}
+                                <option value="{{ hu.codigo_hu }}">{{ hu.codigo_hu }}: {{ hu.descripcion_hu }}</option>
+                            {% endfor %}
+                            <option value="HU01">HU01: Buscador y Filtros de Productos</option>
+                            <option value="HU02">HU02: Pasarela de Pagos y Carrito</option>
+                            <option value="HU03">HU03: Registro e Inicio de Sesión</option>
+                        </select>
+                    </div>
+                    <div class="text-end mt-3">
+                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-success btn-sm">Publicar en el Tablero</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalError01" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title fw-bold">#BUG-001: El carrito se vacía solo al pagar</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="mb-3">
+                    <span class="badge bg-danger">Urgencia: Alta</span>
+                    <span class="badge bg-secondary">Estado: Abierto</span>
+                    <span class="badge bg-dark">HU Asociada: HU02 - Pasarela de Pagos</span>
+                </div>
+                <h6 class="fw-bold text-secondary">Descripción del Error:</h6>
+                <p class="text-muted bg-light p-3 rounded small">
+                    Cuando el cliente agrega productos al carrito, avanza a la pantalla de facturación e introduce los datos de su tarjeta de crédito, al presionar 'Confirmar Pago' el sistema arroja un error inesperado, vacía el carrito por completo y no procesa la orden de compra.
+                </p>
+                <hr>
+                <div class="row text-center small">
+                    <div class="col-6 border-end">
+                        <strong class="d-block text-secondary">Equipo Encargado:</strong>
+                        <span class="text-danger fw-bold">❌ Ninguno (Por Asignar)</span>
+                    </div>
+                    <div class="col-6">
+                        <strong class="d-block text-secondary">Reportado por:</strong>
+                        <span class="text-dark">Luciana Alvarez</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer bg-light">
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-primary btn-sm">Tomar Ticket</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalError02" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-warning text-dark">
+                <h5 class="modal-title fw-bold">#BUG-002: Filtro de precios ordena alfabéticamente</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="mb-3">
+                    <span class="badge bg-warning text-dark">Urgencia: Media</span>
+                    <span class="badge bg-info text-dark">Estado: En Análisis</span>
+                    <span class="badge bg-dark">HU Asociada: HU01 - Buscador y Filtros</span>
+                </div>
+                <h6 class="fw-bold text-secondary">Descripción del Error:</h6>
+                <p class="text-muted bg-light p-3 rounded small">
+                    Al usar el filtro de ordenar productos 'De menor a mayor precio', el sistema procesa los números como si fueran texto. Por ejemplo, muestra un producto de $100 antes que uno de $25 porque detecta el número '1' antes que el '2'.
+                </p>
+                <hr>
+                <div class="row text-center small">
+                    <div class="col-6 border-end">
+                        <strong class="d-block text-secondary">Equipo Encargado:</strong>
+                        <span class="text-success fw-bold">👥 Equipo Alfa (Rafael C.)</span>
+                    </div>
+                    <div class="col-6">
+                        <strong class="d-block text-secondary">Reportado por:</strong>
+                        <span class="text-dark">Sistemas Externos</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer bg-light">
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-outline-warning btn-sm text-dark">Mover a 'En Corrección'</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
