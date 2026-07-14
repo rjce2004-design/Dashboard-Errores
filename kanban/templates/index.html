@@ -16,7 +16,7 @@
     </div>
 
     <div class="row g-3">
-        
+
         <div class="col-md-3">
             <div class="card shadow-sm border-0 bg-white p-3 mb-3">
                 <h5 class="fw-bold text-dark mb-3">🛠️ Panel de Control</h5>
@@ -29,107 +29,83 @@
                 <h5 class="fw-bold text-dark mb-2">📖 Diccionario de HUs</h5>
                 <p class="text-muted small mb-3">Lista de funciones del sistema para asociar a los bugs.</p>
                 <div style="max-height: 150px; overflow-y: auto;" class="pe-1">
+                    {% for hu in hus %}
                     <div class="p-2 border-bottom small">
-                        <strong class="text-primary">HU01:</strong> Buscador y Filtros de Productos
+                        <strong class="text-primary">{{ hu.codigo_hu }}:</strong> {{ hu.descripcion_hu }}
                     </div>
-                    <div class="p-2 border-bottom small">
-                        <strong class="text-primary">HU02:</strong> Pasarela de Pagos y Carrito
-                    </div>
-                    <div class="p-2 border-bottom small">
-                        <strong class="text-primary">HU03:</strong> Registro e Inicio de Sesión
-                    </div>
+                    {% empty %}
+                    <p class="small text-muted mb-0">Aún no hay Historias de Usuario registradas.</p>
+                    {% endfor %}
                 </div>
             </div>
 
             <div class="card shadow-sm border-0 bg-white p-3">
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <h5 class="fw-bold text-dark mb-0">👥 Equipos de Trabajo</h5>
-                    <button class="btn btn-sm btn-outline-secondary py-0 px-2" title="Registrar nuevo equipo"
-                    data-bs-toggle="modal" data-bs-target="#modalNuevoEquipo">+</button>
+                    <button class="btn btn-sm btn-outline-secondary py-0 px-2" title="Registrar nuevo equipo" data-bs-toggle="modal" data-bs-target="#modalNuevoEquipo">+</button>
                 </div>
 
                 {% for equipo in equipos %}
-                <div class="p-2 border rounded bg-light mb-2" style="cursor: pointer;" data-bs-toggle="modal" data-bs-target="#modalEquipo{{ equipo.id }}">
+                <div class="p-2 border rounded bg-light mb-2">
                     <div class="d-flex justify-content-between align-items-center">
-                        <span class="badge bg-primary">{{ equipo.nombre }}</span>
+                        <span class="badge bg-primary">{{ equipo.nombre_equipo }}</span>
                         <small class="text-muted">Líder: {{ equipo.lider }}</small>
                     </div>
                     <div class="mt-2 small text-secondary">
-                        {{ equipo.lista_integrantes|length }} integrante{{ equipo.lista_integrantes|length|pluralize }}
+                        <div><strong>Integrantes:</strong> {{ equipo.integrantes|default:"—" }}</div>
+                        <div><strong>Tickets Asignados:</strong> <span class="badge bg-secondary">{{ equipo.bugs.count }}</span></div>
                     </div>
                 </div>
                 {% empty %}
-                <p class="small text-muted mb-0">No hay equipos registrados.</p>
+                <p class="small text-muted mb-0">Aún no hay equipos registrados. Usa el botón "+" para crear uno.</p>
                 {% endfor %}
             </div>
         </div>
 
         <div class="col-md-9">
             <div class="row row-cols-1 row-cols-lg-5 g-2 align-items-start">
-                
+                {% for col in columnas %}
                 <div class="col">
                     <div class="bg-secondary bg-opacity-10 p-2 rounded" style="min-height: 70vh;">
-                        <h6 class="fw-bold text-uppercase text-muted small px-1 mb-2">1. Abierto (2)</h6>
-                        
-                        <div class="card shadow-sm border-0 mb-2" style="cursor: pointer;" data-bs-toggle="modal" data-bs-target="#modalError01">
+                        <h6 class="fw-bold text-uppercase text-muted small px-1 mb-2">
+                            {{ col.titulo }} ({{ col.bugs|length }})
+                        </h6>
+
+                        {% for bug in col.bugs %}
+                        <div class="card shadow-sm border-0 mb-2" style="cursor: pointer;" data-bs-toggle="modal" data-bs-target="#modalBug{{ bug.id }}">
                             <div class="card-body p-2">
                                 <div class="d-flex justify-content-between align-items-center mb-1">
-                                    <span class="badge bg-danger small">Alta</span>
-                                    <small class="text-muted fw-bold">#BUG-001</small>
+                                    <span class="badge
+                                        {% if bug.severidad == 'ALTA' %}bg-danger
+                                        {% elif bug.severidad == 'MEDIA' %}bg-warning text-dark
+                                        {% else %}bg-secondary{% endif %} small">
+                                        {{ bug.get_severidad_display }}
+                                    </span>
+                                    <small class="text-muted fw-bold">#BUG-{{ bug.id }}</small>
                                 </div>
-                                <h6 class="card-title mb-2 text-dark fw-semibold small">El carrito se vacía solo al pagar</h6>
+                                <h6 class="card-title mb-2 text-dark fw-semibold small">{{ bug.titulo }}</h6>
                                 <div class="d-flex justify-content-between align-items-center">
-                                    <span class="small text-muted"><span class="badge bg-danger p-1 rounded-circle"> </span> Sin asignar</span>
+                                    <span class="small text-muted">
+                                        {% if bug.historia_usuario %}{{ bug.historia_usuario.codigo_hu }}{% else %}Sin HU{% endif %}
+                                    </span>
+                                    <span class="small text-muted">
+                                        {% if bug.equipo %}👥 {{ bug.equipo.nombre_equipo }}{% else %}Sin asignar{% endif %}
+                                    </span>
                                 </div>
                             </div>
                         </div>
-
-                        <div class="card shadow-sm border-0 mb-2" style="cursor: pointer; opacity: 0.85;" data-bs-toggle="modal" data-bs-target="#modalError02">
-                            <div class="card-body p-2">
-                                <div class="d-flex justify-content-between align-items-center mb-1">
-                                    <span class="badge bg-warning text-dark small">Media</span>
-                                    <small class="text-muted fw-bold">#BUG-002</small>
-                                </div>
-                                <h6 class="card-title mb-2 text-dark fw-semibold small">Filtro de precios ordena alfabéticamente</h6>
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <span class="small text-muted"><span class="badge bg-success p-1 rounded-circle"> </span> Equipo Alfa</span>
-                                </div>
-                            </div>
-                        </div>
+                        {% endfor %}
 
                     </div>
                 </div>
-
-                <div class="col">
-                    <div class="bg-secondary bg-opacity-10 p-2 rounded" style="min-height: 70vh;">
-                        <h6 class="fw-bold text-uppercase text-muted small px-1 mb-2">2. En Análisis (0)</h6>
-                    </div>
-                </div>
-
-                <div class="col">
-                    <div class="bg-secondary bg-opacity-10 p-2 rounded" style="min-height: 70vh;">
-                        <h6 class="fw-bold text-uppercase text-muted small px-1 mb-2">3. En Corrección (0)</h6>
-                    </div>
-                </div>
-
-                <div class="col">
-                    <div class="bg-secondary bg-opacity-10 p-2 rounded" style="min-height: 70vh;">
-                        <h6 class="fw-bold text-uppercase text-muted small px-1 mb-2">4. Resuelto (0)</h6>
-                    </div>
-                </div>
-
-                <div class="col">
-                    <div class="bg-secondary bg-opacity-10 p-2 rounded" style="min-height: 70vh;">
-                        <h6 class="fw-bold text-uppercase text-muted small px-1 mb-2">5. Cerrado (0)</h6>
-                    </div>
-                </div>
-
+                {% endfor %}
             </div>
         </div>
 
     </div>
 </div>
 
+<!-- Modal: Nueva Historia de Usuario -->
 <div class="modal fade" id="modalNuevaHU" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow">
@@ -142,7 +118,7 @@
                     {% csrf_token %}
                     <div class="mb-3">
                         <label class="form-label fw-semibold text-secondary">Código identificador</label>
-                        <input type="text" class="form-placeholder form-control" placeholder="Ej: HU04" name="codigo_hu" required>
+                        <input type="text" class="form-control" placeholder="Ej: HU04" name="codigo_hu" required>
                     </div>
                     <div class="mb-3">
                         <label class="form-label fw-semibold text-secondary">Descripción de la Funcionalidad</label>
@@ -158,6 +134,7 @@
     </div>
 </div>
 
+<!-- Modal: Nuevo Defecto -->
 <div class="modal fade" id="modalNuevoBug" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow">
@@ -192,14 +169,29 @@
                     </div>
                     <div class="mb-3">
                         <label class="form-label fw-semibold text-secondary">Asociar a Historia de Usuario (HU)</label>
-                        <select class="form-select" name="hu_asociada" required>
-                            <option value="" disabled selected>-- Selecciona qué funcionalidad falló --</option>
-                            {% for hu in hus %}
-                                <option value="{{ hu.codigo_hu }}">{{ hu.codigo_hu }}: {{ hu.descripcion_hu }}</option>
+                        <select class="form-select" name="hu_asociada" {% if hus %}required{% endif %}>
+                            {% if hus %}
+                                <option value="" disabled selected>-- Selecciona qué funcionalidad falló --</option>
+                                {% for hu in hus %}
+                                    <option value="{{ hu.codigo_hu }}">{{ hu.codigo_hu }}: {{ hu.descripcion_hu }}</option>
+                                {% endfor %}
+                            {% else %}
+                                <option value="" selected>Sin HUs registradas (opcional)</option>
+                            {% endif %}
+                        </select>
+                        {% if not hus %}
+                        <div class="form-text text-warning">
+                            Aún no hay Historias de Usuario creadas. Puedes publicar el defecto sin asociarlo.
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold text-secondary">Asignar a Equipo (opcional)</label>
+                        <select class="form-select" name="equipo_asignado">
+                            <option value="" selected>Sin asignar</option>
+                            {% for equipo in equipos %}
+                                <option value="{{ equipo.id }}">{{ equipo.nombre_equipo }} (Líder: {{ equipo.lider }})</option>
                             {% endfor %}
-                            <option value="HU01">HU01: Buscador y Filtros de Productos</option>
-                            <option value="HU02">HU02: Pasarela de Pagos y Carrito</option>
-                            <option value="HU03">HU03: Registro e Inicio de Sesión</option>
                         </select>
                     </div>
                     <div class="text-end mt-3">
@@ -212,155 +204,122 @@
     </div>
 </div>
 
-<div class="modal fade" id="modalError01" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow">
-            <div class="modal-header bg-danger text-white">
-                <h5 class="modal-title fw-bold">#BUG-001: El carrito se vacía solo al pagar</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body p-4">
-                <div class="mb-3">
-                    <span class="badge bg-danger">Urgencia: Alta</span>
-                    <span class="badge bg-secondary">Estado: Abierto</span>
-                    <span class="badge bg-dark">HU Asociada: HU02 - Pasarela de Pagos</span>
-                </div>
-                <h6 class="fw-bold text-secondary">Descripción del Error:</h6>
-                <p class="text-muted bg-light p-3 rounded small">
-                    Cuando el cliente agrega productos al carrito, avanza a la pantalla de facturación e introduce los datos de su tarjeta de crédito, al presionar 'Confirmar Pago' el sistema arroja un error inesperado, vacía el carrito por completo y no procesa la orden de compra.
-                </p>
-                <hr>
-                <div class="row text-center small">
-                    <div class="col-6 border-end">
-                        <strong class="d-block text-secondary">Equipo Encargado:</strong>
-                         <form method="POST" class="d-flex gap-1 justify-content-center">
-                            {% csrf_token %}
-                            <input type="hidden" name="asignar_equipo_bug_id" value="1">
-                            <select name="equipo_asignado" class="form-select form-select-sm" style="max-width: 140px;">
-                                <option value="">Sin asignar</option>
-                                {% for equipo in equipos %}
-                                    <option value="{{ equipo.id }}">{{ equipo.nombre }}</option>
-                                {% endfor %}
-                            </select>
-                            <button type="submit" class="btn btn-sm btn-outline-primary">OK</button>
-                        </form>
-                    </div>
-                    <div class="col-6">
-                        <strong class="d-block text-secondary">Reportado por:</strong>
-                        <span class="text-dark">Luciana Alvarez</span>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer bg-light">
-                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cerrar</button>
-                <button type="button" class="btn btn-primary btn-sm">Tomar Ticket</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="modal fade" id="modalError02" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow">
-            <div class="modal-header bg-warning text-dark">
-                <h5 class="modal-title fw-bold">#BUG-002: Filtro de precios ordena alfabéticamente</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body p-4">
-                <div class="mb-3">
-                    <span class="badge bg-warning text-dark">Urgencia: Media</span>
-                    <span class="badge bg-info text-dark">Estado: En Análisis</span>
-                    <span class="badge bg-dark">HU Asociada: HU01 - Buscador y Filtros</span>
-                </div>
-                <h6 class="fw-bold text-secondary">Descripción del Error:</h6>
-                <p class="text-muted bg-light p-3 rounded small">
-                    Al usar el filtro de ordenar productos 'De menor a mayor precio', el sistema procesa los números como si fueran texto. Por ejemplo, muestra un producto de $100 antes que uno de $25 porque detecta el número '1' antes que el '2'.
-                </p>
-                <hr>
-                <div class="row text-center small">
-                    <div class="col-6 border-end">
-                        <strong class="d-block text-secondary">Equipo Encargado:</strong>
-                        <form method="POST" class="d-flex gap-1 justify-content-center">
-                                    {% csrf_token %}
-                                    <input type="hidden" name="asignar_equipo_bug_id" value="2">
-                                    <select name="equipo_asignado" class="form-select form-select-sm" style="max-width: 140px;">
-                                        <option value="">Sin asignar</option>
-                                        {% for equipo in equipos %}
-                                            <option value="{{ equipo.id }}">{{ equipo.nombre }}</option>
-                                        {% endfor %}
-                                    </select>
-                                    <button type="submit" class="btn btn-sm btn-outline-primary">OK</button>
-                                </form>
-                            </div>
-                    <div class="col-6">
-                        <strong class="d-block text-secondary">Reportado por:</strong>
-                        <span class="text-dark">Sistemas Externos</span>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer bg-light">
-                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cerrar</button>
-                <button type="button" class="btn btn-outline-warning btn-sm text-dark">Mover a 'En Corrección'</button>
-            </div>
-        </div>
-    </div>
-</div>
-
+<!-- Modal: Nuevo Equipo -->
 <div class="modal fade" id="modalNuevoEquipo" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow">
-            <div class="modal-header bg-primary text-white">
+            <div class="modal-header bg-dark text-white">
                 <h5 class="modal-title fw-bold">👥 Registrar Nuevo Equipo</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body p-4">
-                <form method="POST">
+                <form method="POST" action="{% url 'crear_equipo' %}">
                     {% csrf_token %}
                     <div class="mb-3">
                         <label class="form-label fw-semibold text-secondary">Nombre del Equipo</label>
                         <input type="text" class="form-control" placeholder="Ej: Equipo Beta" name="nombre_equipo" required>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label fw-semibold text-secondary">Líder</label>
-                        <input type="text" class="form-control" placeholder="Nombre del líder" name="lider_equipo" required>
+                        <label class="form-label fw-semibold text-secondary">Nombre del Líder</label>
+                        <input type="text" class="form-control" placeholder="Ej: María Torres" name="lider_equipo" required>
                     </div>
                     <div class="mb-3">
                         <label class="form-label fw-semibold text-secondary">Integrantes</label>
-                        <textarea class="form-control" rows="2" placeholder="Separados por comas: Ana, Luis, Marco" name="integrantes_equipo" required></textarea>
+                        <textarea class="form-control" rows="2" placeholder="Separa los nombres con comas: Juan Pérez, Ana Gómez" name="integrantes_equipo"></textarea>
                     </div>
                     <div class="text-end mt-3">
                         <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="btn btn-primary btn-sm">Guardar Equipo</button>
+                        <button type="submit" class="btn btn-dark btn-sm">Guardar Equipo</button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
 </div>
-{% for equipo in equipos %}
-<div class="modal fade" id="modalEquipo{{ equipo.id }}" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow">
-            <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title fw-bold">👥 {{ equipo.nombre }}</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body p-4">
-                <p class="mb-2"><strong class="text-secondary">Líder:</strong> {{ equipo.lider }}</p>
-                <strong class="text-secondary d-block mb-1">Integrantes:</strong>
-                <ul class="mb-0">
-                    {% for integrante in equipo.lista_integrantes %}
-                        <li>{{ integrante }}</li>
-                    {% endfor %}
-                </ul>
-            </div>
-            <div class="modal-footer bg-light">
-                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cerrar</button>
+
+<!-- Modales de Detalle: uno por cada bug real en la base de datos -->
+{% for col in columnas %}
+    {% for bug in col.bugs %}
+    <div class="modal fade" id="modalBug{{ bug.id }}" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header
+                    {% if bug.severidad == 'ALTA' %}bg-danger text-white
+                    {% elif bug.severidad == 'MEDIA' %}bg-warning text-dark
+                    {% else %}bg-secondary text-white{% endif %}">
+                    <h5 class="modal-title fw-bold">#BUG-{{ bug.id }}: {{ bug.titulo }}</h5>
+                    <button type="button" class="btn-close {% if bug.severidad == 'ALTA' %}btn-close-white{% endif %}" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+
+                    <div class="mb-3">
+                        <span class="badge
+                            {% if bug.severidad == 'ALTA' %}bg-danger
+                            {% elif bug.severidad == 'MEDIA' %}bg-warning text-dark
+                            {% else %}bg-secondary{% endif %}">
+                            Urgencia: {{ bug.get_severidad_display }}
+                        </span>
+                        <span class="badge bg-secondary">Estado: {{ bug.get_estado_display }}</span>
+                        {% if bug.historia_usuario %}
+                        <span class="badge bg-dark">HU: {{ bug.historia_usuario.codigo_hu }} - {{ bug.historia_usuario.descripcion_hu }}</span>
+                        {% endif %}
+                    </div>
+
+                    <h6 class="fw-bold text-secondary">Descripción del Error:</h6>
+                    <p class="text-muted bg-light p-3 rounded small">
+                        {{ bug.descripcion }}
+                    </p>
+
+                    <hr>
+
+                    <!-- Asignar / reasignar equipo -->
+                    <h6 class="fw-bold text-secondary small">Equipo Encargado</h6>
+                    <form method="POST" action="{% url 'asignar_equipo' bug.id %}" class="d-flex gap-2 align-items-center mb-3">
+                        {% csrf_token %}
+                        <select name="equipo_id" class="form-select form-select-sm">
+                            <option value="">Sin asignar</option>
+                            {% for equipo in equipos %}
+                                <option value="{{ equipo.id }}" {% if bug.equipo_id == equipo.id %}selected{% endif %}>
+                                    {{ equipo.nombre_equipo }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        <button type="submit" class="btn btn-outline-secondary btn-sm text-nowrap">Guardar</button>
+                    </form>
+
+                    <hr>
+
+                    <!-- Avanzar de estado -->
+                    <div class="mb-2">
+                        {% with sig=bug.siguiente_estado %}
+                            {% if sig %}
+                            <form method="POST" action="{% url 'avanzar_estado' bug.id %}">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-outline-primary btn-sm w-100">
+                                     Mover a "{{ sig.0 }}"
+                                </button>
+                            </form>
+                            {% else %}
+                            <span class="badge bg-success w-100 py-2">✔ Este defecto ya está en el estado final</span>
+                            {% endif %}
+                        {% endwith %}
+                    </div>
+
+                </div>
+                <div class="modal-footer bg-light d-flex justify-content-between">
+                    <form method="POST" action="{% url 'eliminar_bug' bug.id %}"
+                          onsubmit="return confirm('¿Estás seguro de que deseas eliminar el defecto #BUG-{{ bug.id }} ({{ bug.titulo|escapejs }})? Esta acción no se puede deshacer.');">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger btn-sm">🗑️ Eliminar Bug</button>
+                    </form>
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cerrar</button>
+                </div>
             </div>
         </div>
     </div>
-</div>
+    {% endfor %}
 {% endfor %}
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

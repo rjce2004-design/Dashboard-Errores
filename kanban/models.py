@@ -1,5 +1,6 @@
 from django.db import models
 
+
 class HistoriaUsuario(models.Model):
     codigo_hu = models.CharField(max_length=10, unique=True)
     descripcion_hu = models.TextField()
@@ -9,15 +10,19 @@ class HistoriaUsuario(models.Model):
 
 
 class Equipo(models.Model):
-    nombre = models.CharField(max_length=100, unique=True)
+    nombre_equipo = models.CharField(max_length=100, unique=True)
     lider = models.CharField(max_length=100)
-    integrantes = models.TextField(help_text="Nombres separados por comas")
+    integrantes = models.TextField(
+        blank=True,
+        help_text="Nombres de los integrantes separados por comas"
+    )
 
     def __str__(self):
-        return self.nombre
+        return self.nombre_equipo
 
     def lista_integrantes(self):
-        return [i.strip() for i in self.integrantes.split(',') if i.strip()]
+        """Devuelve los nombres de los integrantes como una lista limpia."""
+        return [nombre.strip() for nombre in self.integrantes.split(',') if nombre.strip()]
 
 
 class Defecto(models.Model):
@@ -29,6 +34,9 @@ class Defecto(models.Model):
         ('CERRADO', '5. Cerrado'),
     ]
 
+    # Orden secuencial de los estados, usado para "avanzar" un bug a la siguiente columna
+    ORDEN_ESTADOS = ['ABIERTO', 'ANALISIS', 'CORRECCION', 'RESUELTO', 'CERRADO']
+
     SEVERIDADES = [
         ('BAJA', 'Baja'),
         ('MEDIA', 'Media'),
@@ -39,8 +47,27 @@ class Defecto(models.Model):
     descripcion = models.TextField()
     severidad = models.CharField(max_length=10, choices=SEVERIDADES, default='MEDIA')
     estado = models.CharField(max_length=15, choices=ESTADOS, default='ABIERTO')
-    historia_usuario = models.ForeignKey(HistoriaUsuario, on_delete=models.CASCADE, null=True, blank=True)
-    equipo = models.ForeignKey(Equipo, on_delete=models.SET_NULL, null=True, blank=True)
+    historia_usuario = models.ForeignKey(
+        HistoriaUsuario, on_delete=models.CASCADE, null=True, blank=True
+    )
+    equipo = models.ForeignKey(
+        Equipo,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='bugs'
+    )
 
     def __str__(self):
         return self.titulo
+
+    def siguiente_estado(self):
+        """Devuelve (codigo, etiqueta) del siguiente estado, o None si ya está en el último."""
+        try:
+            idx = self.ORDEN_ESTADOS.index(self.estado)
+        except ValueError:
+            return None
+        if idx < len(self.ORDEN_ESTADOS) - 1:
+            siguiente_codigo = self.ORDEN_ESTADOS[idx + 1]
+            return dict(self.ESTADOS)[siguiente_codigo], siguiente_codigo
+        return None
