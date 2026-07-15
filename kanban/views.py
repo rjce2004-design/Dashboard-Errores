@@ -1,3 +1,7 @@
+from urllib import request
+
+from django.http import HttpResponse
+from .models import HistoriaUsuario, Defecto, Equipo, Desarrollador, PruebaUnitaria, Sprint
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.http import require_POST
 from django.contrib import messages
@@ -40,9 +44,10 @@ def tablero_kanban(request):
                 )
             return redirect('tablero')
 
-    hus = HistoriaUsuario.objects.all()
-    equipos = Equipo.objects.all()
-    desarrolladores = Desarrollador.objects.all()
+        hus = HistoriaUsuario.objects.all()
+        equipos = Equipo.objects.all()
+        desarrolladores = Desarrollador.objects.all()
+        sprints = Sprint.objects.filter(estado='ABIERTO')  # solo abiertos para asignar
 
     columnas = []
     for codigo, etiqueta in Defecto.ESTADOS:
@@ -159,3 +164,89 @@ def panel_metricas(request):
         'severidad_labels': dict(Defecto.SEVERIDADES),
         'estado_labels': dict(Defecto.ESTADOS),
     })
+
+    return render(request, 'index.html', {
+        'hus': hus,
+        'equipos': equipos,
+        'desarrolladores': desarrolladores,
+        'sprints': sprints,
+        'columnas': columnas,
+    })
+
+@require_POST
+def crear_sprint(request):
+    nombre = request.POST.get('nombre_sprint')
+    fecha_inicio = request.POST.get('fecha_inicio_sprint')
+    fecha_fin = request.POST.get('fecha_fin_sprint')
+
+    if nombre and fecha_inicio and fecha_fin:
+        Sprint.objects.create(nombre=nombre, fecha_inicio=fecha_inicio, fecha_fin=fecha_fin)
+    return redirect('tablero')
+
+
+@require_POST
+def cerrar_sprint(request, sprint_id):
+    sprint = get_object_or_404(Sprint, id=sprint_id)
+    sprint.estado = 'CERRADO'
+    sprint.save()
+    return redirect('historial_sprints')
+
+
+@require_POST
+def asignar_sprint(request, bug_id):
+    """Requisito 10: valida que el sprint destino no esté cerrado antes de asignar."""
+    bug = get_object_or_404(Defecto, id=bug_id)
+    sprint_id = request.POST.get('sprint_id')
+
+    if not sprint_id:
+        bug.sprint = None
+        bug.save()
+        return redirect('tablero')
+
+    sprint = get_object_or_404(Sprint, id=sprint_id)
+    if not bug.puede_asignarse_a_sprint(sprint):
+        messages.error(
+            request,
+            f'No se puede asignar #BUG-{bug.id} al sprint "{sprint.nombre}": '
+            f'ese sprint ya está cerrado.'
+        )
+        return redirect('tablero')
+
+    bug.sprint = sprint
+    bug.save()
+    return redirect('tablero')
+
+
+def historial_sprints(request):
+    """Requisito 8: historial de sprints con sus tareas (defectos) asociadas."""
+    sprints = Sprint.objects.all().prefetch_related('defectos')
+    return render(request, 'historial_sprints.html', {'sprints': sprints})
+
+
+def exportar_sprint(request, sprint_id):
+    """Requisito 9: exporta el resumen del sprint en texto plano."""
+    sprint = get_object_or_404(Sprint, id=sprint_id)
+    defectos = sprint.defectos.select_related('desarrollador_asignado', 'equipo').all()
+
+    lineas = []
+    lineas.append(f"RESUMEN DE SPRINT: {sprint.nombre}")
+    lineas.append(f"Periodo: {sprint.fecha_inicio} a {sprint.fecha_fin}")
+    lineas.append(f"Estado: {sprint.get_estado_display()}")
+    lineas.append(f"Total de tareas: {defectos.count()}")
+    lineas.append("-" * 50)
+
+    for d in defectos:
+        dev = d.desarrollador_asignado.nombre if d.desarrollador_asignado else "Sin asignar"
+        lineas.append(f"#BUG-{d.id} | {d.titulo}")
+        lineas.append(f"  Severidad: {d.get_severidad_display()} | Estado: {d.get_estado_display()}")
+        lineas.append(f"  Desarrollador: {dev}")
+        lineas.append(f"  Pruebas registradas: {d.pruebas.count()}")
+        lineas.append("")
+
+    if not defectos:
+        lineas.append("(Este sprint no tiene tareas asociadas)")
+
+    contenido = "\n".join(lineas)
+    response = HttpResponse(contenido, content_type='text/plain; charset=utf-8')
+    response['Content-Disposition'] = f'attachment; filename="sprint_{sprint.id}_{sprint.nombre}.txt"'
+    return response

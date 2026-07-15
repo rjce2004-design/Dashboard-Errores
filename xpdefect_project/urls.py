@@ -9,6 +9,11 @@ from kanban.views import (
     crear_desarrollador,
     crear_prueba,
     panel_metricas,
+    crear_sprint,
+    cerrar_sprint,
+    asignar_sprint,
+    historial_sprints,
+    exportar_sprint,
 )
 
 urlpatterns = [
@@ -21,4 +26,9 @@ urlpatterns = [
     path('desarrollador/crear/', crear_desarrollador, name='crear_desarrollador'),
     path('bug/<int:bug_id>/prueba/crear/', crear_prueba, name='crear_prueba'),
     path('metricas/', panel_metricas, name='panel_metricas'),
+    path('sprint/crear/', crear_sprint, name='crear_sprint'),
+    path('sprint/<int:sprint_id>/cerrar/', cerrar_sprint, name='cerrar_sprint'),
+    path('bug/<int:bug_id>/asignar-sprint/', asignar_sprint, name='asignar_sprint'),
+    path('sprints/', historial_sprints, name='historial_sprints'),
+    path('sprint/<int:sprint_id>/exportar/', exportar_sprint, name='exportar_sprint'),
 ]

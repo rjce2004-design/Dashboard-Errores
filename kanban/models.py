@@ -65,6 +65,10 @@ class Defecto(models.Model):
         Desarrollador, on_delete=models.SET_NULL, null=True, blank=True,
         related_name='bugs_asignados'
     )
+    sprint = models.ForeignKey(
+        'Sprint', on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='defectos'
+    )
 
     def __str__(self):
         return self.titulo
@@ -85,6 +89,11 @@ class Defecto(models.Model):
     def puede_pasar_a_resuelto(self):
         """Regla: un defecto solo puede marcarse RESUELTO si tiene ≥1 prueba registrada."""
         return self.tiene_prueba_registrada()
+    def puede_asignarse_a_sprint(self, sprint):
+        """Requisito 10: no se puede asignar una tarea a un sprint ya cerrado."""
+        if sprint is None:
+            return True
+        return sprint.estado != 'CERRADO'
 
 
 class PruebaUnitaria(models.Model):
@@ -101,3 +110,20 @@ class PruebaUnitaria(models.Model):
 
     def __str__(self):
         return f"{self.nombre_prueba} ({self.get_resultado_display()})"
+
+class Sprint(models.Model):
+    ESTADOS_SPRINT = [
+        ('ABIERTO', 'Abierto'),
+        ('CERRADO', 'Cerrado'),
+    ]
+
+    nombre = models.CharField(max_length=100, unique=True)
+    fecha_inicio = models.DateField()
+    fecha_fin = models.DateField()
+    estado = models.CharField(max_length=10, choices=ESTADOS_SPRINT, default='ABIERTO')
+
+    def __str__(self):
+        return f"{self.nombre} ({self.get_estado_display()})"
+
+    class Meta:
+        ordering = ['-fecha_inicio']

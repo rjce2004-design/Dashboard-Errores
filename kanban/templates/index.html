@@ -32,6 +32,10 @@
                 <p class="small text-muted mb-3"><strong>Proyecto Activo:</strong> Delivery App (Ficticio)</p>
                 <button class="btn btn-outline-primary btn-sm w-100 mb-2" data-bs-toggle="modal" data-bs-target="#modalNuevaHU">+ Crear Historia de Usuario (HU)</button>
                 <button class="btn btn-success btn-sm w-100 mb-2" data-bs-toggle="modal" data-bs-target="#modalNuevoBug">+ Reportar Nuevo Defecto</button>
+                <a href="{% url 'panel_metricas' %}" class="btn btn-outline-dark btn-sm w-100 mb-2">📊 Ver Panel de Métricas</a>
+                <button class="btn btn-outline-secondary btn-sm w-100 mb-2" data-bs-toggle="modal" data-bs-target="#modalNuevoDesarrollador">+ Registrar Desarrollador</button>
+                <a href="{% url 'historial_sprints' %}" class="btn btn-outline-dark btn-sm w-100 mb-2">🏁 Historial de Sprints</a>
+    <button class="btn btn-outline-secondary btn-sm w-100 mb-2" data-bs-toggle="modal" data-bs-target="#modalNuevoSprint">+ Crear Sprint</button>
             </div>
 
             <div class="card shadow-sm border-0 bg-white p-3 mb-3">
@@ -335,6 +339,22 @@
                             </select>
                             <button type="submit" class="btn btn-outline-success btn-sm text-nowrap">+ Añadir</button>
                         </form>
+                        
+                        <hr>
+                        <h6 class="fw-bold text-secondary small">🏁 Sprint Asignado</h6>
+                        <form method="POST" action="{% url 'asignar_sprint' bug.id %}" class="d-flex gap-2 align-items-center mb-2">
+                            {% csrf_token %}
+                            <select name="sprint_id" class="form-select form-select-sm">
+                                <option value="">Sin sprint</option>
+                                {% for sprint in sprints %}
+                                    <option value="{{ sprint.id }}" {% if bug.sprint_id == sprint.id %}selected{% endif %}>{{ sprint.nombre }}</option>
+                                {% endfor %}
+                            </select>
+                            <button type="submit" class="btn btn-outline-secondary btn-sm text-nowrap">Guardar</button>
+                        </form>
+                        {% if bug.sprint and bug.sprint.estado == 'CERRADO' %}
+                        <span class="badge bg-secondary">Este defecto pertenece a un sprint cerrado</span>
+                        {% endif %}
 
                     <!-- Avanzar de estado -->
                     <div class="mb-2">
@@ -389,6 +409,40 @@
                                 <option value="{{ equipo.id }}">{{ equipo.nombre_equipo }}</option>
                             {% endfor %}
                         </select>
+                    </div>
+                    <div class="text-end mt-3">
+                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-dark btn-sm">Guardar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalNuevoSprint" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title fw-bold">🏁 Crear Sprint</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <form method="POST" action="{% url 'crear_sprint' %}">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold text-secondary">Nombre del Sprint</label>
+                        <input type="text" class="form-control" placeholder="Ej: Sprint 5" name="nombre_sprint" required>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-6">
+                            <label class="form-label fw-semibold text-secondary">Fecha inicio</label>
+                            <input type="date" class="form-control" name="fecha_inicio_sprint" required>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label fw-semibold text-secondary">Fecha fin</label>
+                            <input type="date" class="form-control" name="fecha_fin_sprint" required>
+                        </div>
                     </div>
                     <div class="text-end mt-3">
                         <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
