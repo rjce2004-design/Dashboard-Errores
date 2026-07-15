@@ -29,7 +29,7 @@
         <div class="col-md-3">
             <div class="card shadow-sm border-0 bg-white p-3 mb-3">
                 <h5 class="fw-bold text-dark mb-3">🛠️ Panel de Control</h5>
-                <p class="small text-muted mb-3"><strong>Proyecto Activo:</strong> Delivery App (Ficticio)</p>
+                <p class="small text-muted mb-3"><strong>Proyecto Activo:</strong> Delivery App </p>
                 <button class="btn btn-outline-primary btn-sm w-100 mb-2" data-bs-toggle="modal" data-bs-target="#modalNuevaHU">+ Crear Historia de Usuario (HU)</button>
                 <button class="btn btn-success btn-sm w-100 mb-2" data-bs-toggle="modal" data-bs-target="#modalNuevoBug">+ Reportar Nuevo Defecto</button>
                 <a href="{% url 'panel_metricas' %}" class="btn btn-outline-dark btn-sm w-100 mb-2">📊 Ver Panel de Métricas</a>
@@ -339,7 +339,7 @@
                             </select>
                             <button type="submit" class="btn btn-outline-success btn-sm text-nowrap">+ Añadir</button>
                         </form>
-                        
+
                         <hr>
                         <h6 class="fw-bold text-secondary small">🏁 Sprint Asignado</h6>
                         <form method="POST" action="{% url 'asignar_sprint' bug.id %}" class="d-flex gap-2 align-items-center mb-2">

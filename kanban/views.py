@@ -184,7 +184,6 @@ def cerrar_sprint(request, sprint_id):
 
 @require_POST
 def asignar_sprint(request, bug_id):
-    """Requisito 10: valida que el sprint destino no esté cerrado antes de asignar."""
     bug = get_object_or_404(Defecto, id=bug_id)
     sprint_id = request.POST.get('sprint_id')
 
@@ -208,13 +207,11 @@ def asignar_sprint(request, bug_id):
 
 
 def historial_sprints(request):
-    """Requisito 8: historial de sprints con sus tareas (defectos) asociadas."""
     sprints = Sprint.objects.all().prefetch_related('defectos')
     return render(request, 'historial_sprints.html', {'sprints': sprints})
 
 
 def exportar_sprint(request, sprint_id):
-    """Requisito 9: exporta el resumen del sprint en texto plano."""
     sprint = get_object_or_404(Sprint, id=sprint_id)
     defectos = sprint.defectos.select_related('desarrollador_asignado', 'equipo').all()
 
