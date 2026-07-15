@@ -14,6 +14,8 @@ from kanban.views import (
     asignar_sprint,
     historial_sprints,
     exportar_sprint,
+    exportar_defectos,
+    marcar_notificaciones_leidas,
 )
 
 urlpatterns = [
@@ -31,4 +33,6 @@ urlpatterns = [
     path('bug/<int:bug_id>/asignar-sprint/', asignar_sprint, name='asignar_sprint'),
     path('sprints/', historial_sprints, name='historial_sprints'),
     path('sprint/<int:sprint_id>/exportar/', exportar_sprint, name='exportar_sprint'),
+    path('defectos/exportar/', exportar_defectos, name='exportar_defectos'),
+    path('notificaciones/marcar-leidas/', marcar_notificaciones_leidas, name='marcar_notificaciones_leidas'),
 ]

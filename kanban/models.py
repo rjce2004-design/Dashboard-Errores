@@ -96,6 +96,39 @@ class Defecto(models.Model):
         return sprint.estado != 'CERRADO'
 
 
+class HistorialEstado(models.Model):
+    """Requisito 8: historial de cambios de estado por defecto, con fecha y responsable."""
+
+    defecto = models.ForeignKey(Defecto, on_delete=models.CASCADE, related_name='historial')
+    estado_anterior = models.CharField(max_length=15, choices=Defecto.ESTADOS, blank=True)
+    estado_nuevo = models.CharField(max_length=15, choices=Defecto.ESTADOS)
+    responsable = models.CharField(max_length=100, blank=True, default='Sin especificar')
+    fecha = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-fecha']
+
+    def __str__(self):
+        return f"#{self.defecto_id}: {self.estado_anterior or '—'} → {self.estado_nuevo} ({self.responsable})"
+
+
+class Notificacion(models.Model):
+    """Requisito 9: notificación interna al asignar o cambiar el estado de un defecto."""
+
+    defecto = models.ForeignKey(
+        Defecto, on_delete=models.CASCADE, related_name='notificaciones', null=True, blank=True
+    )
+    mensaje = models.CharField(max_length=255)
+    fecha = models.DateTimeField(auto_now_add=True)
+    leida = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ['-fecha']
+
+    def __str__(self):
+        return self.mensaje
+
+
 class PruebaUnitaria(models.Model):
     RESULTADOS = [
         ('PASO', 'Pasó'),

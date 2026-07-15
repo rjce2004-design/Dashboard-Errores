@@ -19,8 +19,16 @@
 
 <div class="container-fluid py-4">
     <div class="row mb-4">
-        <div class="col">
+        <div class="col d-flex justify-content-between align-items-center">
             <h1 class="fw-bold text-dark">XPDefect <span class="fs-5 text-muted">| Kanban de Seguimiento</span></h1>
+            <button class="btn btn-outline-dark position-relative" data-bs-toggle="modal" data-bs-target="#modalNotificaciones">
+                🔔 Notificaciones
+                {% if notificaciones %}
+                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                    {{ notificaciones|length }}
+                </span>
+                {% endif %}
+            </button>
         </div>
     </div>
 
@@ -36,6 +44,7 @@
                 <button class="btn btn-outline-secondary btn-sm w-100 mb-2" data-bs-toggle="modal" data-bs-target="#modalNuevoDesarrollador">+ Registrar Desarrollador</button>
                 <a href="{% url 'historial_sprints' %}" class="btn btn-outline-dark btn-sm w-100 mb-2">🏁 Historial de Sprints</a>
     <button class="btn btn-outline-secondary btn-sm w-100 mb-2" data-bs-toggle="modal" data-bs-target="#modalNuevoSprint">+ Crear Sprint</button>
+    <a href="{% url 'exportar_defectos' %}" class="btn btn-outline-primary btn-sm w-100 mb-2">📄 Exportar Listado de Defectos</a>
             </div>
 
             <div class="card shadow-sm border-0 bg-white p-3 mb-3">
@@ -312,6 +321,7 @@
                                     <option value="{{ dev.id }}" {% if bug.desarrollador_asignado_id == dev.id %}selected{% endif %}>{{ dev.nombre }}</option>
                                 {% endfor %}
                             </select>
+                            <input type="text" name="responsable" class="form-control form-control-sm" placeholder="Tu nombre (responsable)" style="max-width: 160px;">
                             <button type="submit" class="btn btn-outline-secondary btn-sm text-nowrap">Guardar</button>
                         </form>
 
@@ -360,9 +370,10 @@
                     <div class="mb-2">
                         {% with sig=bug.siguiente_estado %}
                             {% if sig %}
-                            <form method="POST" action="{% url 'avanzar_estado' bug.id %}">
+                            <form method="POST" action="{% url 'avanzar_estado' bug.id %}" class="d-flex gap-2">
                                 {% csrf_token %}
-                                <button type="submit" class="btn btn-outline-primary btn-sm w-100">
+                                <input type="text" name="responsable" class="form-control form-control-sm" placeholder="Tu nombre (responsable)">
+                                <button type="submit" class="btn btn-outline-primary btn-sm text-nowrap">
                                      Mover a "{{ sig.0 }}"
                                 </button>
                             </form>
@@ -371,6 +382,18 @@
                             {% endif %}
                         {% endwith %}
                     </div>
+
+                    <hr>
+                    <h6 class="fw-bold text-secondary small">🕓 Historial de Cambios de Estado</h6>
+                    {% for h in bug.historial.all %}
+                    <div class="small border-bottom py-1">
+                        {% if h.estado_anterior %}{{ h.get_estado_anterior_display }} → {% endif %}
+                        <strong>{{ h.get_estado_nuevo_display }}</strong>
+                        <span class="text-muted">— {{ h.responsable }} · {{ h.fecha|date:"d/m/Y H:i" }}</span>
+                    </div>
+                    {% empty %}
+                    <p class="small text-muted">Aún no hay cambios de estado registrados.</p>
+                    {% endfor %}
 
                 </div>
                 <div class="modal-footer bg-light d-flex justify-content-between">
@@ -450,6 +473,36 @@
                     </div>
                 </form>
             </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Notificaciones -->
+<div class="modal fade" id="modalNotificaciones" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title fw-bold">🔔 Notificaciones Internas</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                {% for n in notificaciones %}
+                <div class="small border-bottom py-2">
+                    {{ n.mensaje }}
+                    <div class="text-muted">{{ n.fecha|date:"d/m/Y H:i" }}</div>
+                </div>
+                {% empty %}
+                <p class="small text-muted mb-0">No hay notificaciones nuevas.</p>
+                {% endfor %}
+            </div>
+            {% if notificaciones %}
+            <div class="modal-footer bg-light">
+                <form method="POST" action="{% url 'marcar_notificaciones_leidas' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-outline-secondary btn-sm">Marcar todas como leídas</button>
+                </form>
+            </div>
+            {% endif %}
         </div>
     </div>
 </div>
