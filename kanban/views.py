@@ -78,6 +78,22 @@ def eliminar_bug(request, bug_id):
 
 
 @require_POST
+def eliminar_hu(request, hu_id):
+    hu = get_object_or_404(HistoriaUsuario, id=hu_id)
+    hu.delete()
+    messages.success(request, f'Historia de Usuario "{hu.codigo_hu}" eliminada.')
+    return redirect('tablero')
+
+
+@require_POST
+def eliminar_equipo(request, equipo_id):
+    equipo = get_object_or_404(Equipo, id=equipo_id)
+    equipo.delete()
+    messages.success(request, f'Equipo "{equipo.nombre_equipo}" eliminado.')
+    return redirect('tablero')
+
+
+@require_POST
 def avanzar_estado(request, bug_id):
     bug = get_object_or_404(Defecto, id=bug_id)
     responsable = request.POST.get('responsable', '').strip() or 'Sin especificar'
@@ -114,6 +130,35 @@ def avanzar_estado(request, bug_id):
             ),
         )
         messages.success(request, f'#BUG-{bug.id} avanzó a "{bug.get_estado_display()}".')
+    return redirect('tablero')
+
+
+@require_POST
+def retroceder_estado(request, bug_id):
+    bug = get_object_or_404(Defecto, id=bug_id)
+    responsable = request.POST.get('responsable', '').strip() or 'Sin especificar'
+    resultado = bug.anterior_estado()
+    if resultado:
+        _, anterior_codigo = resultado
+        estado_anterior = bug.estado
+        bug.estado = anterior_codigo
+        bug.save()
+
+        HistorialEstado.objects.create(
+            defecto=bug,
+            estado_anterior=estado_anterior,
+            estado_nuevo=anterior_codigo,
+            responsable=responsable,
+        )
+        Notificacion.objects.create(
+            defecto=bug,
+            mensaje=(
+                f'#BUG-{bug.id} "{bug.titulo}" retrocedió de '
+                f'{dict(Defecto.ESTADOS)[estado_anterior]} a '
+                f'{dict(Defecto.ESTADOS)[anterior_codigo]} (por {responsable}).'
+            ),
+        )
+        messages.success(request, f'#BUG-{bug.id} retrocedió a "{bug.get_estado_display()}".')
     return redirect('tablero')
 
 

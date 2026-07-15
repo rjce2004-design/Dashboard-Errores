@@ -55,7 +55,7 @@ class Defecto(models.Model):
     severidad = models.CharField(max_length=10, choices=SEVERIDADES, default='MEDIA')
     estado = models.CharField(max_length=15, choices=ESTADOS, default='ABIERTO')
     historia_usuario = models.ForeignKey(
-        HistoriaUsuario, on_delete=models.CASCADE, null=True, blank=True
+        HistoriaUsuario, on_delete=models.SET_NULL, null=True, blank=True
     )
     equipo = models.ForeignKey(
         Equipo, on_delete=models.SET_NULL, null=True, blank=True,
@@ -74,6 +74,8 @@ class Defecto(models.Model):
         return self.titulo
 
     def siguiente_estado(self):
+        if self.estado == 'CERRADO':
+            return None  # un defecto cerrado no se puede modificar
         try:
             idx = self.ORDEN_ESTADOS.index(self.estado)
         except ValueError:
@@ -81,6 +83,20 @@ class Defecto(models.Model):
         if idx < len(self.ORDEN_ESTADOS) - 1:
             siguiente_codigo = self.ORDEN_ESTADOS[idx + 1]
             return dict(self.ESTADOS)[siguiente_codigo], siguiente_codigo
+        return None
+
+    def anterior_estado(self):
+        """Permite retroceder de estado (ej. de Resuelto a Corrección).
+        Un defecto Cerrado no se puede modificar en ninguna dirección."""
+        if self.estado == 'CERRADO':
+            return None
+        try:
+            idx = self.ORDEN_ESTADOS.index(self.estado)
+        except ValueError:
+            return None
+        if idx > 0:
+            anterior_codigo = self.ORDEN_ESTADOS[idx - 1]
+            return dict(self.ESTADOS)[anterior_codigo], anterior_codigo
         return None
 
     def tiene_prueba_registrada(self):

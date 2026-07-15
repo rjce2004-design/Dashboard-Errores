@@ -52,8 +52,13 @@
                 <p class="text-muted small mb-3">Lista de funciones del sistema para asociar a los bugs.</p>
                 <div style="max-height: 150px; overflow-y: auto;" class="pe-1">
                     {% for hu in hus %}
-                    <div class="p-2 border-bottom small">
-                        <strong class="text-primary">{{ hu.codigo_hu }}:</strong> {{ hu.descripcion_hu }}
+                    <div class="p-2 border-bottom small d-flex justify-content-between align-items-start gap-2">
+                        <div><strong class="text-primary">{{ hu.codigo_hu }}:</strong> {{ hu.descripcion_hu }}</div>
+                        <form method="POST" action="{% url 'eliminar_hu' hu.id %}"
+                              onsubmit="return confirm('¿Eliminar la HU {{ hu.codigo_hu }}? Los bugs asociados quedarán sin HU. Esta acción no se puede deshacer.');">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm btn-outline-danger py-0 px-1" title="Eliminar HU">🗑️</button>
+                        </form>
                     </div>
                     {% empty %}
                     <p class="small text-muted mb-0">Aún no hay Historias de Usuario registradas.</p>
@@ -71,7 +76,14 @@
                 <div class="p-2 border rounded bg-light mb-2">
                     <div class="d-flex justify-content-between align-items-center">
                         <span class="badge bg-primary">{{ equipo.nombre_equipo }}</span>
-                        <small class="text-muted">Líder: {{ equipo.lider }}</small>
+                        <div class="d-flex align-items-center gap-2">
+                            <small class="text-muted">Líder: {{ equipo.lider }}</small>
+                            <form method="POST" action="{% url 'eliminar_equipo' equipo.id %}"
+                                  onsubmit="return confirm('¿Eliminar el equipo {{ equipo.nombre_equipo }}? Los bugs y desarrolladores asociados quedarán sin equipo. Esta acción no se puede deshacer.');">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm btn-outline-danger py-0 px-1" title="Eliminar equipo">🗑️</button>
+                            </form>
+                        </div>
                     </div>
                     <div class="mt-2 small text-secondary">
                         <div><strong>Integrantes:</strong> {{ equipo.integrantes|default:"—" }}</div>
@@ -366,21 +378,51 @@
                         <span class="badge bg-secondary">Este defecto pertenece a un sprint cerrado</span>
                         {% endif %}
 
-                    <!-- Avanzar de estado -->
+                    <!-- Avanzar / retroceder de estado -->
                     <div class="mb-2">
-                        {% with sig=bug.siguiente_estado %}
-                            {% if sig %}
-                            <form method="POST" action="{% url 'avanzar_estado' bug.id %}" class="d-flex gap-2">
-                                {% csrf_token %}
-                                <input type="text" name="responsable" class="form-control form-control-sm" placeholder="Tu nombre (responsable)">
-                                <button type="submit" class="btn btn-outline-primary btn-sm text-nowrap">
-                                     Mover a "{{ sig.0 }}"
-                                </button>
-                            </form>
-                            {% else %}
-                            <span class="badge bg-success w-100 py-2">✔ Este defecto ya está en el estado final</span>
-                            {% endif %}
-                        {% endwith %}
+                        {% if bug.estado == 'CERRADO' %}
+                            <span class="badge bg-secondary w-100 py-2">🔒 Defecto Cerrado — no se puede modificar</span>
+                        {% else %}
+                            <div class="d-flex gap-2 mb-2">
+                                <input type="text" id="responsable-{{ bug.id }}" class="form-control form-control-sm" placeholder="Tu nombre (responsable)">
+                            </div>
+                            <div class="d-flex gap-2">
+                                {% with ant=bug.anterior_estado %}
+                                {% if ant %}
+                                <form method="POST" action="{% url 'retroceder_estado' bug.id %}" class="flex-fill" id="form-retroceder-{{ bug.id }}">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="responsable" class="responsable-hidden-{{ bug.id }}">
+                                    <button type="submit" class="btn btn-outline-warning btn-sm w-100 btn-retroceder" data-bug="{{ bug.id }}">
+                                        ← Regresar a "{{ ant.0 }}"
+                                    </button>
+                                </form>
+                                {% endif %}
+                                {% endwith %}
+
+                                {% with sig=bug.siguiente_estado %}
+                                {% if sig %}
+                                <form method="POST" action="{% url 'avanzar_estado' bug.id %}" class="flex-fill" id="form-avanzar-{{ bug.id }}"
+                                    {% if sig.1 == 'CERRADO' %}onsubmit="return confirm('¿Confirmas que #BUG-{{ bug.id }} está listo para pasar a Cerrado? Una vez cerrado no podrá modificarse.');"{% endif %}>
+                                    {% csrf_token %}
+                                    <input type="hidden" name="responsable" class="responsable-hidden-{{ bug.id }}">
+                                    <button type="submit" class="btn btn-outline-primary btn-sm w-100 btn-avanzar" data-bug="{{ bug.id }}">
+                                        Mover a "{{ sig.0 }}" →
+                                    </button>
+                                </form>
+                                {% endif %}
+                                {% endwith %}
+                            </div>
+                            <script>
+                            (function() {
+                                var input = document.getElementById('responsable-{{ bug.id }}');
+                                document.querySelectorAll('.btn-avanzar[data-bug="{{ bug.id }}"], .btn-retroceder[data-bug="{{ bug.id }}"]').forEach(function(btn) {
+                                    btn.closest('form').addEventListener('submit', function() {
+                                        this.querySelector('.responsable-hidden-{{ bug.id }}').value = input ? input.value : '';
+                                    });
+                                });
+                            })();
+                            </script>
+                        {% endif %}
                     </div>
 
                     <hr>
