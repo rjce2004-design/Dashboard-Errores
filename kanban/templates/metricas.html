@@ -20,7 +20,7 @@
                 <h5 class="fw-bold">Por Severidad</h5>
                 {% for item in por_severidad %}
                 <div class="d-flex justify-content-between border-bottom py-1">
-                    <span>{{ severidad_labels|default_if_none:"" }}{{ item.severidad }}</span>
+                    <span>{{ item.severidad }}</span>
                     <span class="badge bg-primary">{{ item.total }}</span>
                 </div>
                 {% endfor %}

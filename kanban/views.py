@@ -172,6 +172,15 @@ def asignar_equipo(request, bug_id):
     nuevo_equipo = Equipo.objects.filter(id=equipo_id).first() if equipo_id else None
     nuevo_dev = Desarrollador.objects.filter(id=desarrollador_id).first() if desarrollador_id else None
 
+    # Requisito 2: el desarrollador debe pertenecer al equipo seleccionado.
+    if nuevo_equipo and nuevo_dev and nuevo_dev.equipo_id != nuevo_equipo.id:
+        messages.error(
+            request,
+            f'No se puede asignar a "{nuevo_dev.nombre}": no pertenece al equipo '
+            f'"{nuevo_equipo.nombre_equipo}".'
+        )
+        return redirect('tablero')
+
     if nuevo_equipo != bug.equipo or nuevo_dev != bug.desarrollador_asignado:
         bug.equipo = nuevo_equipo
         bug.desarrollador_asignado = nuevo_dev
@@ -235,6 +244,9 @@ def marcar_notificaciones_leidas(request):
 
 def panel_metricas(request):
     """Requisito 7: métricas por severidad, por desarrollador y por estado."""
+    severidad_labels = dict(Defecto.SEVERIDADES)
+    estado_labels = dict(Defecto.ESTADOS)
+
     por_severidad = Defecto.objects.values('severidad').annotate(total=Count('id')).order_by('severidad')
     por_estado = Defecto.objects.values('estado').annotate(total=Count('id')).order_by('estado')
     por_desarrollador = (
@@ -246,13 +258,23 @@ def panel_metricas(request):
         estado__in=['RESUELTO', 'CERRADO']
     ).exclude(pruebas__isnull=False).count()
 
+    # Traducimos los códigos (ALTA, ABIERTO, ...) a sus etiquetas legibles aquí,
+    # ya que Django templates no permite indexar un dict con una variable sin un
+    # templatetag personalizado.
+    por_severidad = [
+        {'severidad': severidad_labels.get(item['severidad'], item['severidad']), 'total': item['total']}
+        for item in por_severidad
+    ]
+    por_estado = [
+        {'estado': estado_labels.get(item['estado'], item['estado']), 'total': item['total']}
+        for item in por_estado
+    ]
+
     return render(request, 'metricas.html', {
         'por_severidad': por_severidad,
         'por_estado': por_estado,
         'por_desarrollador': por_desarrollador,
         'resueltos_sin_prueba': resueltos_sin_prueba,
-        'severidad_labels': dict(Defecto.SEVERIDADES),
-        'estado_labels': dict(Defecto.ESTADOS),
     })
 
 @require_POST
