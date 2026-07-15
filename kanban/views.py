@@ -1,12 +1,9 @@
-from urllib import request
-
 from django.http import HttpResponse
 from .models import HistoriaUsuario, Defecto, Equipo, Desarrollador, PruebaUnitaria, Sprint
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.http import require_POST
 from django.contrib import messages
 from django.db.models import Count
-from .models import HistoriaUsuario, Defecto, Equipo, Desarrollador, PruebaUnitaria
 
 
 def tablero_kanban(request):
@@ -44,10 +41,10 @@ def tablero_kanban(request):
                 )
             return redirect('tablero')
 
-        hus = HistoriaUsuario.objects.all()
-        equipos = Equipo.objects.all()
-        desarrolladores = Desarrollador.objects.all()
-        sprints = Sprint.objects.filter(estado='ABIERTO')  # solo abiertos para asignar
+    hus = HistoriaUsuario.objects.all()
+    equipos = Equipo.objects.all()
+    desarrolladores = Desarrollador.objects.all()
+    sprints = Sprint.objects.filter(estado='ABIERTO')
 
     columnas = []
     for codigo, etiqueta in Defecto.ESTADOS:
@@ -63,6 +60,7 @@ def tablero_kanban(request):
         'hus': hus,
         'equipos': equipos,
         'desarrolladores': desarrolladores,
+        'sprints': sprints,
         'columnas': columnas,
     })
 
@@ -163,14 +161,6 @@ def panel_metricas(request):
         'resueltos_sin_prueba': resueltos_sin_prueba,
         'severidad_labels': dict(Defecto.SEVERIDADES),
         'estado_labels': dict(Defecto.ESTADOS),
-    })
-
-    return render(request, 'index.html', {
-        'hus': hus,
-        'equipos': equipos,
-        'desarrolladores': desarrolladores,
-        'sprints': sprints,
-        'columnas': columnas,
     })
 
 @require_POST
