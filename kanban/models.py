@@ -21,8 +21,18 @@ class Equipo(models.Model):
         return self.nombre_equipo
 
     def lista_integrantes(self):
-        """Devuelve los nombres de los integrantes como una lista limpia."""
         return [nombre.strip() for nombre in self.integrantes.split(',') if nombre.strip()]
+
+
+class Desarrollador(models.Model):
+    nombre = models.CharField(max_length=100)
+    equipo = models.ForeignKey(
+        Equipo, on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='desarrolladores'
+    )
+
+    def __str__(self):
+        return self.nombre
 
 
 class Defecto(models.Model):
@@ -33,10 +43,7 @@ class Defecto(models.Model):
         ('RESUELTO', '4. Resuelto'),
         ('CERRADO', '5. Cerrado'),
     ]
-
-    # Orden secuencial de los estados, usado para "avanzar" un bug a la siguiente columna
     ORDEN_ESTADOS = ['ABIERTO', 'ANALISIS', 'CORRECCION', 'RESUELTO', 'CERRADO']
-
     SEVERIDADES = [
         ('BAJA', 'Baja'),
         ('MEDIA', 'Media'),
@@ -51,18 +58,18 @@ class Defecto(models.Model):
         HistoriaUsuario, on_delete=models.CASCADE, null=True, blank=True
     )
     equipo = models.ForeignKey(
-        Equipo,
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
+        Equipo, on_delete=models.SET_NULL, null=True, blank=True,
         related_name='bugs'
+    )
+    desarrollador_asignado = models.ForeignKey(
+        Desarrollador, on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='bugs_asignados'
     )
 
     def __str__(self):
         return self.titulo
 
     def siguiente_estado(self):
-        """Devuelve (codigo, etiqueta) del siguiente estado, o None si ya está en el último."""
         try:
             idx = self.ORDEN_ESTADOS.index(self.estado)
         except ValueError:
@@ -71,3 +78,26 @@ class Defecto(models.Model):
             siguiente_codigo = self.ORDEN_ESTADOS[idx + 1]
             return dict(self.ESTADOS)[siguiente_codigo], siguiente_codigo
         return None
+
+    def tiene_prueba_registrada(self):
+        return self.pruebas.exists()
+
+    def puede_pasar_a_resuelto(self):
+        """Regla: un defecto solo puede marcarse RESUELTO si tiene ≥1 prueba registrada."""
+        return self.tiene_prueba_registrada()
+
+
+class PruebaUnitaria(models.Model):
+    RESULTADOS = [
+        ('PASO', 'Pasó'),
+        ('FALLO', 'Falló'),
+    ]
+
+    defecto = models.ForeignKey(Defecto, on_delete=models.CASCADE, related_name='pruebas')
+    nombre_prueba = models.CharField(max_length=150)
+    resultado = models.CharField(max_length=10, choices=RESULTADOS, default='PASO')
+    fecha_registro = models.DateTimeField(auto_now_add=True)
+    notas = models.TextField(blank=True)
+
+    def __str__(self):
+        return f"{self.nombre_prueba} ({self.get_resultado_display()})"
